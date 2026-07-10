@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Administrador — SisLog Mil{% endblock %}
+{% block body %}
+<div class="topbar">
+  <div class="brand">
+    <div>
+      <span class="eyebrow">Painel do Administrador</span>
+      <h1>SisLog Mil</h1>
+    </div>
+  </div>
+  <div class="actions">
+    <span class="hint">{{ sessao.nome }}</span>
+    <a class="btn btn-sm" href="/logout">Sair</a>
+  </div>
+</div>
+
+<div class="container">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+    <h2 style="margin:0;font-size:18px;">Gerentes cadastrados</h2>
+    <a class="btn btn-primary" href="/admin/gerentes/novo">+ Novo gerente</a>
+  </div>
+
+  {% if gerentes %}
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Login</th>
+          <th>Exercícios</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for g in gerentes %}
+        <tr>
+          <td>{{ g.nome }}</td>
+          <td>{{ g.login }}</td>
+          <td>{{ g.exercicios|length }}</td>
+          <td>
+            {% if g.ativo %}
+              <span class="badge badge-andamento">Ativo</span>
+            {% else %}
+              <span class="badge badge-encerrado">Desativado</span>
+            {% endif %}
+          </td>
+          <td style="text-align:right;white-space:nowrap;">
+            <a class="btn btn-sm" href="/admin/gerentes/{{ g.id }}/editar">Editar</a>
+            <form style="display:inline;" method="post" action="/admin/gerentes/{{ g.id }}/alternar-status">
+              <button class="btn btn-sm{{ ' btn-danger' if g.ativo else '' }}" type="submit">
+                {{ "Desativar" if g.ativo else "Reativar" }}
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card center-empty">Nenhum gerente cadastrado ainda. Clique em "Novo gerente" para começar.</div>
+  {% endif %}
+</div>
+{% endblock %}

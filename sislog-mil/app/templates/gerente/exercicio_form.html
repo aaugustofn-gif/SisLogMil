@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ "Editar" if exercicio else "Novo" }} exercício — SisLog Mil{% endblock %}
+{% block body %}
+<div class="topbar">
+  <div class="brand">
+    <div>
+      <span class="eyebrow">Painel do Gerente</span>
+      <h1>{{ "Editar exercício" if exercicio else "Novo exercício" }}</h1>
+    </div>
+  </div>
+  <div class="actions">
+    <a class="btn btn-sm" href="/gerente">Voltar</a>
+  </div>
+</div>
+
+<div class="container">
+  <div class="card" style="max-width:460px;">
+    <form class="stack" method="post" action="{{ '/gerente/exercicios/%d/editar' % exercicio.id if exercicio else '/gerente/exercicios/novo' }}">
+      <div>
+        <label>Nome do exercício</label>
+        <input type="text" name="nome" value="{{ exercicio.nome if exercicio else '' }}" required>
+      </div>
+      <div>
+        <label>Local</label>
+        <input type="text" name="local" value="{{ exercicio.local if exercicio else '' }}" required>
+      </div>
+      <div>
+        <label>Data de início</label>
+        <input type="date" name="data_inicio" value="{{ exercicio.data_inicio if exercicio else '' }}" required>
+      </div>
+      <div>
+        <label>Data de término</label>
+        <input type="date" name="data_fim" value="{{ exercicio.data_fim if exercicio else '' }}" required>
+      </div>
+      <button class="btn btn-primary" type="submit">Salvar</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

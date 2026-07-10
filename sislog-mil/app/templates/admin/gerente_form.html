@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ "Editar" if gerente else "Novo" }} gerente — SisLog Mil{% endblock %}
+{% block body %}
+<div class="topbar">
+  <div class="brand">
+    <div>
+      <span class="eyebrow">Painel do Administrador</span>
+      <h1>{{ "Editar gerente" if gerente else "Novo gerente" }}</h1>
+    </div>
+  </div>
+  <div class="actions">
+    <a class="btn btn-sm" href="/admin">Voltar</a>
+  </div>
+</div>
+
+<div class="container">
+  {% if erro %}<p class="error">{{ erro }}</p>{% endif %}
+  <div class="card" style="max-width:460px;">
+    <form class="stack" method="post" action="{{ '/admin/gerentes/%d/editar' % gerente.id if gerente else '/admin/gerentes/novo' }}">
+      <div>
+        <label>Nome completo</label>
+        <input type="text" name="nome" value="{{ gerente.nome if gerente else '' }}" required>
+      </div>
+      <div>
+        <label>Login</label>
+        <input type="text" name="login" value="{{ gerente.login if gerente else '' }}" required>
+      </div>
+      <div>
+        <label>{{ "Nova senha (deixe em branco para manter a atual)" if gerente else "Senha" }}</label>
+        <input type="password" name="senha" {{ "required" if not gerente else "" }}>
+      </div>
+      <button class="btn btn-primary" type="submit">Salvar</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% import "gerente/_subtabs.html" as nav %}
+{% block title %}Usuários — {{ ex.nome }}{% endblock %}
+{% block body %}
+{{ nav.subtabs(ex, aba) }}
+<div class="container">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+    <h2 style="margin:0;font-size:18px;">Usuários deste exercício</h2>
+    <a class="btn btn-primary" href="/gerente/exercicios/{{ ex.id }}/usuarios/novo">+ Novo usuário</a>
+  </div>
+
+  {% if usuarios %}
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table>
+      <thead>
+        <tr><th>Nome</th><th>Login</th><th>Status</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for u in usuarios %}
+        <tr>
+          <td>{{ u.nome }}</td>
+          <td>{{ u.login }}</td>
+          <td>
+            {% if u.ativo %}<span class="badge badge-andamento">Ativo</span>
+            {% else %}<span class="badge badge-encerrado">Desativado</span>{% endif %}
+          </td>
+          <td style="text-align:right;white-space:nowrap;">
+            <a class="btn btn-sm" href="/gerente/exercicios/{{ ex.id }}/usuarios/{{ u.id }}/editar">Editar</a>
+            <form style="display:inline;" method="post" action="/gerente/exercicios/{{ ex.id }}/usuarios/{{ u.id }}/alternar-status">
+              <button class="btn btn-sm{{ ' btn-danger' if u.ativo else '' }}" type="submit">
+                {{ "Desativar" if u.ativo else "Reativar" }}
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card center-empty">Nenhum usuário cadastrado ainda.</div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% import "gerente/_subtabs.html" as nav %}
+{% block title %}Categorias — {{ ex.nome }}{% endblock %}
+{% block body %}
+{{ nav.subtabs(ex, aba) }}
+<div class="container">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+    <h2 style="margin:0;font-size:18px;">Categorias deste exercício</h2>
+    <a class="btn btn-primary" href="/gerente/exercicios/{{ ex.id }}/categorias/nova">+ Nova categoria</a>
+  </div>
+  <p class="hint" style="margin-top:-10px;margin-bottom:18px;">
+    Cada categoria vira uma aba no painel público. Use "Disponibilidade" para meios (gráfico de pizza) ou "Consumo" para munição, combustível ou qualquer outro insumo (gráfico de linha).
+  </p>
+
+  {% if ex.categorias %}
+  <div class="grid">
+    {% for cat in ex.categorias %}
+    <a class="card" href="/gerente/exercicios/{{ ex.id }}/categorias/{{ cat.id }}" style="display:block;">
+      <h3>{{ cat.nome }}</h3>
+      <p class="hint">{{ "📊 Disponibilidade (pizza)" if cat.tipo_grafico == 'disponibilidade' else "📈 Consumo (linha)" }}</p>
+      <p class="hint">{{ cat.itens|length }} item(ns) cadastrado(s)</p>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card center-empty">Nenhuma categoria criada ainda. Clique em "Nova categoria" para começar (ex: Meios, Munição, Combustível).</div>
+  {% endif %}
+</div>
+{% endblock %}

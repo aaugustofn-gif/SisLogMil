@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% import "gerente/_subtabs.html" as nav %}
+{% block title %}{{ ex.nome }} — SisLog Mil{% endblock %}
+{% block body %}
+{{ nav.subtabs(ex, aba) }}
+<div class="container">
+  <div class="card">
+    {% set b = {'EM ANDAMENTO': 'badge-andamento', 'PROGRAMADO': 'badge-programado', 'ENCERRADO': 'badge-encerrado'} %}
+    <span class="badge {{ b[ex.status] }}">{{ ex.status }}</span>
+    <h2 style="margin:10px 0 4px;">{{ ex.nome }}</h2>
+    <p class="hint">📍 {{ ex.local }}</p>
+    <p class="hint">📅 {{ ex.data_inicio.strftime('%d/%m/%Y') }} — {{ ex.data_fim.strftime('%d/%m/%Y') }}</p>
+    <a class="btn btn-sm" href="/gerente/exercicios/{{ ex.id }}/editar">Editar dados do exercício</a>
+  </div>
+
+  <div style="height:20px;"></div>
+
+  <div class="timeline-track">
+    {% set pct = ex.percentual_concluido %}
+    <div class="timeline-fill" style="width:{{ pct }}%;"></div>
+    <div class="timeline-dot" style="left:{{ pct }}%;"></div>
+  </div>
+  <div class="timeline-labels">
+    <span>{{ ex.data_inicio.strftime('%d/%m/%Y') }}</span>
+    <span style="color:#3b82f6;">Hoje</span>
+    <span>{{ ex.data_fim.strftime('%d/%m/%Y') }}</span>
+  </div>
+  <p class="hint" style="text-align:center;">{{ pct }}% concluído</p>
+
+  <div style="height:20px;"></div>
+  <div class="grid">
+    <a class="card" href="/gerente/exercicios/{{ ex.id }}/categorias" style="display:block;">
+      <h3>Categorias</h3>
+      <p class="hint">{{ ex.categorias|length }} categoria(s) configurada(s)</p>
+    </a>
+    <a class="card" href="/gerente/exercicios/{{ ex.id }}/usuarios" style="display:block;">
+      <h3>Usuários</h3>
+      <p class="hint">{{ ex.usuarios|length }} usuário(s) cadastrado(s)</p>
+    </a>
+  </div>
+</div>
+{% endblock %}

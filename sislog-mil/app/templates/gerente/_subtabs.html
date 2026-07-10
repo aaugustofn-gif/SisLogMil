@@ -1,0 +1,20 @@
+{% macro subtabs(ex, aba) %}
+<div class="topbar">
+  <div class="brand">
+    <div>
+      <span class="eyebrow">Painel do Gerente</span>
+      <h1>{{ ex.nome }}</h1>
+    </div>
+  </div>
+  <div class="actions">
+    <a class="chip" href="/gerente">← Meus exercícios</a>
+    <a class="btn btn-sm" href="/painel/{{ ex.id }}" target="_blank">Ver painel público</a>
+    <a class="btn btn-sm" href="/gerente/senha">Trocar senha</a>
+    <a class="btn btn-sm" href="/logout">Sair</a>
+  <a href="/gerente/exercicios/{{ ex.id }}" class="{{ 'active' if aba == 'visao' else '' }}">Visão geral</a>
+  <a href="/gerente/exercicios/{{ ex.id }}/categorias" class="{{ 'active' if aba == 'categorias' else '' }}">Categorias</a>
+  <a href="/gerente/exercicios/{{ ex.id }}/usuarios" class="{{ 'active' if aba == 'usuarios' else '' }}">Usuários</a>
+  <a href="/gerente/exercicios/{{ ex.id }}/lancamentos" class="{{ 'active' if aba == 'lancamentos' else '' }}">Lançamentos</a>
+  <a href="/gerente/exercicios/{{ ex.id }}/exportar">Exportar planilha</a>
+</div>
+{% endmacro %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Meus exercícios — SisLog Mil{% endblock %}
+{% block body %}
+<div class="topbar">
+  <div class="brand">
+    <div>
+      <span class="eyebrow">Painel do Gerente</span>
+      <h1>SisLog Mil</h1>
+    </div>
+  </div>
+  <div class="actions">
+    <span class="hint">{{ sessao.nome }}</span>
+    <a class="btn btn-sm" href="/gerente/senha">Trocar senha</a>
+    <a class="btn btn-sm" href="/logout">Sair</a>
+  </div>
+</div>
+
+<div class="container">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+    <h2 style="margin:0;font-size:18px;">Meus exercícios</h2>
+    <a class="btn btn-primary" href="/gerente/exercicios/novo">+ Novo exercício</a>
+  </div>
+
+  {% if exercicios %}
+  <div class="grid">
+    {% for ex in exercicios %}
+    <a class="card" href="/gerente/exercicios/{{ ex.id }}" style="display:block;">
+      {% set b = {'EM ANDAMENTO': 'badge-andamento', 'PROGRAMADO': 'badge-programado', 'ENCERRADO': 'badge-encerrado'} %}
+      <span class="badge {{ b[ex.status] }}">{{ ex.status }}</span>
+      <h3 style="margin-top:10px;">{{ ex.nome }}</h3>
+      <p class="hint" style="margin:4px 0;">📍 {{ ex.local }}</p>
+      <p class="hint" style="margin:4px 0;">📅 {{ ex.data_inicio.strftime('%d/%m/%Y') }} — {{ ex.data_fim.strftime('%d/%m/%Y') }}</p>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card center-empty">Nenhum exercício cadastrado ainda. Clique em "Novo exercício" para começar.</div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Lançamentos do dia — SisLog Mil{% endblock %}
+{% block body %}
+<div class="topbar">
+  <div class="brand">
+    <div>
+      <span class="eyebrow">{{ ex.nome }} — {{ hoje.strftime('%d/%m/%Y') }}</span>
+      <h1>Olá, {{ usuario.nome }}</h1>
+    </div>
+  </div>
+  <div class="actions">
+    <a class="btn btn-sm" href="/usuario/senha">Trocar senha</a>
+    <a class="btn btn-sm" href="/logout">Sair</a>
+  </div>
+</div>
+
+<div class="container">
+  {% for cat in ex.categorias %}
+  <div class="card" style="margin-bottom:24px;">
+    <h3 style="margin-top:0;">{{ cat.nome }}</h3>
+
+    {% if cat.tipo_grafico == "disponibilidade" %}
+      {% if cat.itens %}
+      <div class="grid">
+        {% for item in cat.itens %}
+        {% set meu = meus_disponibilidade.get(item.id) %}
+        <div class="card" style="background:var(--bg-alt);">
+          <h3 style="font-size:15px;">{{ item.nome }}</h3>
+          <form class="stack" method="post" action="/usuario/disponibilidade/{{ item.id }}">
+            <div>
+              <label>Quantidade disponível</label>
+              <input type="number" min="0" name="quantidade_disponivel" value="{{ meu.quantidade_disponivel if meu else '' }}" required>
+            </div>
+            <div>
+              <label>Quantidade indisponível</label>
+              <input type="number" min="0" name="quantidade_indisponivel" value="{{ meu.quantidade_indisponivel if meu else '' }}" required>
+            </div>
+            <button class="btn btn-primary btn-sm" type="submit">{{ "Atualizar" if meu else "Lançar" }}</button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="hint">Nenhum item cadastrado nesta categoria ainda.</p>
+      {% endif %}
+
+    {% else %}
+      {% if cat.itens %}
+      <div class="grid">
+        {% for item in cat.itens %}
+        {% set meus = meus_consumo.get(item.id, []) %}
+        <div class="card" style="background:var(--bg-alt);">
+          <h3 style="font-size:15px;">{{ item.nome }} <span class="unit">{{ item.unidade }}</span></h3>
+          <form class="stack" method="post" action="/usuario/consumo/{{ item.id }}">
+            <div>
+              <label>Quantidade consumida agora</label>
+              <input type="number" step="0.01" min="0" name="quantidade" required>
+            </div>
+            <button class="btn btn-primary btn-sm" type="submit">Lançar</button>
+          </form>
+          {% if meus %}
+          <p class="hint" style="margin-top:12px;margin-bottom:4px;">Já lançado hoje:</p>
+          {% for l in meus %}
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:4px 0;border-top:1px solid var(--card-border);">
+            <span>{{ l.quantidade }} {{ item.unidade }}</span>
+            <form method="post" action="/usuario/consumo/{{ item.id }}/lancamento/{{ l.id }}/excluir"
+                  onsubmit="return confirm('Desfazer este lançamento?');">
+              <button class="btn btn-sm btn-danger" type="submit" style="padding:2px 8px;">Desfazer</button>
+            </form>
+          </div>
+          {% endfor %}
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="hint">Nenhum item cadastrado nesta categoria ainda.</p>
+      {% endif %}
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="card center-empty">O gerente ainda não cadastrou categorias para este exercício.</div>
+  {% endfor %}
+</div>
+{% endblock %}

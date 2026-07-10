@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Trocar senha — SisLog Mil{% endblock %}
+{% block body %}
+<div class="topbar">
+  <div class="brand"><h1>Trocar senha</h1></div>
+  <div class="actions"><a class="btn btn-sm" href="/usuario">Voltar</a></div>
+</div>
+<div class="container">
+  {% if erro %}<p class="error">{{ erro }}</p>{% endif %}
+  {% if sucesso %}<p class="hint" style="color:#22c55e;">{{ sucesso }}</p>{% endif %}
+  <div class="card" style="max-width:420px;">
+    <form class="stack" method="post" action="/usuario/senha">
+      <div>
+        <label>Senha atual</label>
+        <input type="password" name="senha_atual" required>
+      </div>
+      <div>
+        <label>Nova senha</label>
+        <input type="password" name="nova_senha" required>
+      </div>
+      <button class="btn btn-primary" type="submit">Salvar nova senha</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

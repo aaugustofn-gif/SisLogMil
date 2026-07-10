@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}{{ ex.nome }} — Painel Logístico{% endblock %}
+{% block extra_head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+  @media print {
+    .topbar .actions, .tabs { display: none !important; }
+  }
+</style>
+{% endblock %}
+{% block body %}
+<div class="topbar">
+  <div class="brand">
+    <a class="btn btn-sm" href="/painel">← Voltar</a>
+    <div>
+      <span class="eyebrow">Dashboard Executivo</span>
+      <h1>Painel Logístico</h1>
+    </div>
+  </div>
+  <div class="actions">
+    <span class="chip">{{ ex.nome }}</span>
+    <button class="btn btn-primary btn-sm" onclick="window.print()">⭳ Exportar PDF</button>
+    <button class="btn btn-sm" onclick="location.reload()">↻ Atualizar</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <a href="/painel/{{ ex.id }}" class="{{ 'active' if aba_ativa is none else '' }}">▦ Exercício</a>
+  {% for cat in ex.categorias %}
+  <a href="/painel/{{ ex.id }}/{{ cat.id }}" class="{{ 'active' if aba_ativa == cat.id else '' }}">
+    {{ "📊" if cat.tipo_grafico == "disponibilidade" else "📈" }} {{ cat.nome }}
+  </a>
+  {% endfor %}
+</div>
+
+<div class="container">
+  {% if aba_ativa is none %}
+    {% set b = {'EM ANDAMENTO': 'badge-andamento', 'PROGRAMADO': 'badge-programado', 'ENCERRADO': 'badge-encerrado'} %}
+    <div class="card">
+      <span class="badge {{ b[ex.status] }}">{{ ex.status }}</span>
+      <h2 style="margin:10px 0 4px;">{{ ex.nome }}</h2>
+      <p class="hint">📍 {{ ex.local }}</p>
+      <p class="hint">📅 {{ ex.data_inicio.strftime('%d/%m/%Y') }} — {{ ex.data_fim.strftime('%d/%m/%Y') }}</p>
+    </div>
+
+    <div style="height:20px;"></div>
+    <div class="card">
+      <p class="hint" style="text-transform:uppercase;letter-spacing:1px;font-size:11px;">Linha do tempo do exercício</p>
+      {% set pct = ex.percentual_concluido %}
+      <div class="timeline-track">
+        <div class="timeline-fill" style="width:{{ pct }}%;"></div>
+        <div class="timeline-dot" style="left:{{ pct }}%;"></div>
+      </div>
+      <div class="timeline-labels">
+        <span>{{ ex.data_inicio.strftime('%d/%m/%Y') }}</span>
+        <span style="color:#3b82f6;">Hoje: {{ hoje.strftime('%d/%m/%Y') }}</span>
+        <span>{{ ex.data_fim.strftime('%d/%m/%Y') }}</span>
+      </div>
+      <p class="hint" style="text-align:center;">{{ pct }}% concluído</p>
+    </div>
+
+    {% if not ex.categorias %}
+    <div style="height:20px;"></div>
+    <div class="card center-empty">O gerente ainda não configurou categorias para este exercício.</div>
+    {% endif %}
+
+  {% else %}
+    {% if graficos %}
+    <div class="grid">
+      {% for g in graficos %}
+      <div class="card">
+        <h3>{{ g.item.nome }}{% if categoria.tipo_grafico == "consumo" %}<span class="unit">{{ g.item.unidade }}</span>{% endif %}</h3>
+
+        {% if categoria.tipo_grafico == "disponibilidade" %}
+          <canvas id="chart-{{ g.item.id }}" height="220"></canvas>
+          <div class="legend">
+            <span><span class="dot dot-green"></span>Disponível</span>
+            <span><span class="dot dot-red"></span>Indisponível</span>
+          </div>
+          <script>
+          new Chart(document.getElementById("chart-{{ g.item.id }}"), {
+            type: "pie",
+            data: {
+              labels: ["Disponível", "Indisponível"],
+              datasets: [{
+                data: [{{ g.disponivel }}, {{ g.indisponivel }}],
+                backgroundColor: ["#22c55e", "#ef4444"],
+                borderWidth: 0,
+              }],
+            },
+            options: {
+              plugins: { legend: { display: false } },
+              responsive: true,
+            },
+          });
+          </script>
+        {% else %}
+          <canvas id="chart-{{ g.item.id }}" height="220"></canvas>
+          <div class="legend">
+            <span><span class="dot dot-blue"></span>Autorizado: {{ g.autorizado }}</span>
+            <span><span class="dot dot-green"></span>Acumulado: {{ g.total_atual }}</span>
+          </div>
+          <script>
+          new Chart(document.getElementById("chart-{{ g.item.id }}"), {
+            type: "line",
+            data: {
+              labels: {{ g.rotulos | tojson }},
+              datasets: [
+                {
+                  label: "Autorizado",
+                  data: Array({{ g.rotulos | length }}).fill({{ g.autorizado }}),
+                  borderColor: "#3b82f6",
+                  borderDash: [6, 4],
+                  pointRadius: 0,
+                  borderWidth: 2,
+                },
+                {
+                  label: "Acumulado",
+                  data: {{ g.acumulado | tojson }},
+                  borderColor: "#22c55e",
+                  backgroundColor: "rgba(34,197,94,0.08)",
+                  fill: true,
+                  tension: 0.25,
+                  pointRadius: 3,
+                  borderWidth: 2,
+                },
+              ],
+            },
+            options: {
+              plugins: { legend: { display: false } },
+              responsive: true,
+              scales: {
+                x: { grid: { color: "#1e2a47" }, ticks: { color: "#93a0bd" } },
+                y: { grid: { color: "#1e2a47" }, ticks: { color: "#93a0bd" }, beginAtZero: true },
+              },
+            },
+          });
+          </script>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="card center-empty">Nenhum item cadastrado nesta categoria ainda.</div>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

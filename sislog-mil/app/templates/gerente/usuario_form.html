@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ "Editar" if usuario else "Novo" }} usuário — {{ ex.nome }}{% endblock %}
+{% block body %}
+<div class="topbar">
+  <div class="brand">
+    <div>
+      <span class="eyebrow">{{ ex.nome }}</span>
+      <h1>{{ "Editar usuário" if usuario else "Novo usuário" }}</h1>
+    </div>
+  </div>
+  <div class="actions">
+    <a class="btn btn-sm" href="/gerente/exercicios/{{ ex.id }}/usuarios">Voltar</a>
+  </div>
+</div>
+
+<div class="container">
+  {% if erro %}<p class="error">{{ erro }}</p>{% endif %}
+  <div class="card" style="max-width:460px;">
+    <form class="stack" method="post" action="{{ '/gerente/exercicios/%d/usuarios/%d/editar' % (ex.id, usuario.id) if usuario else '/gerente/exercicios/%d/usuarios/novo' % ex.id }}">
+      <div>
+        <label>Nome completo</label>
+        <input type="text" name="nome" value="{{ usuario.nome if usuario else '' }}" required>
+      </div>
+      <div>
+        <label>Login</label>
+        <input type="text" name="login" value="{{ usuario.login if usuario else '' }}" required>
+      </div>
+      <div>
+        <label>{{ "Nova senha (deixe em branco para manter a atual)" if usuario else "Senha" }}</label>
+        <input type="password" name="senha" {{ "required" if not usuario else "" }}>
+      </div>
+      <button class="btn btn-primary" type="submit">Salvar</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

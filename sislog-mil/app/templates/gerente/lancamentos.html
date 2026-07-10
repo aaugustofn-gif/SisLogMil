@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% import "gerente/_subtabs.html" as nav %}
+{% block title %}Lançamentos — {{ ex.nome }}{% endblock %}
+{% block body %}
+{{ nav.subtabs(ex, aba) }}
+<div class="container">
+  <h2 style="font-size:18px;">Disponibilidade lançada (meios)</h2>
+  {% if disponibilidade %}
+  <div class="card" style="padding:0;overflow:hidden;margin-bottom:28px;">
+    <table>
+      <thead><tr><th>Data</th><th>Categoria</th><th>Item</th><th>Disponível</th><th>Indisponível</th><th>Lançado por</th><th></th></tr></thead>
+      <tbody>
+        {% for l in disponibilidade %}
+        <tr>
+          <td>{{ l.data.strftime('%d/%m/%Y') }}</td>
+          <td>{{ l.item.categoria.nome }}</td>
+          <td>{{ l.item.nome }}</td>
+          <td>{{ l.quantidade_disponivel }}</td>
+          <td>{{ l.quantidade_indisponivel }}</td>
+          <td>{{ l.usuario.nome }}</td>
+          <td style="white-space:nowrap;">
+            <a class="btn btn-sm" href="/gerente/exercicios/{{ ex.id }}/lancamentos/disponibilidade/{{ l.id }}/editar">Editar</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card center-empty" style="margin-bottom:28px;">Nenhum lançamento de disponibilidade ainda.</div>
+  {% endif %}
+
+  <h2 style="font-size:18px;">Consumo lançado (munição, combustível, etc.)</h2>
+  {% if consumo %}
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table>
+      <thead><tr><th>Data</th><th>Categoria</th><th>Item</th><th>Quantidade</th><th>Lançado por</th><th></th></tr></thead>
+      <tbody>
+        {% for l in consumo %}
+        <tr>
+          <td>{{ l.data.strftime('%d/%m/%Y') }}</td>
+          <td>{{ l.item.categoria.nome }}</td>
+          <td>{{ l.item.nome }}</td>
+          <td>{{ l.quantidade }} {{ l.item.unidade }}</td>
+          <td>{{ l.usuario.nome }}</td>
+          <td style="white-space:nowrap;">
+            <a class="btn btn-sm" href="/gerente/exercicios/{{ ex.id }}/lancamentos/consumo/{{ l.id }}/editar">Editar</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card center-empty">Nenhum lançamento de consumo ainda.</div>
+  {% endif %}
+</div>
+{% endblock %}

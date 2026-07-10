@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Editar lançamento — {{ ex.nome }}{% endblock %}
+{% block body %}
+<div class="topbar">
+  <div class="brand">
+    <div>
+      <span class="eyebrow">{{ ex.nome }}</span>
+      <h1>Editar disponibilidade</h1>
+    </div>
+  </div>
+  <div class="actions">
+    <a class="btn btn-sm" href="/gerente/exercicios/{{ ex.id }}/lancamentos">Voltar</a>
+  </div>
+</div>
+
+<div class="container">
+  <div class="card" style="max-width:460px;">
+    <p class="hint">{{ lanc.item.categoria.nome }} — {{ lanc.item.nome }} — {{ lanc.data.strftime('%d/%m/%Y') }} — lançado por {{ lanc.usuario.nome }}</p>
+    <form class="stack" method="post" action="/gerente/exercicios/{{ ex.id }}/lancamentos/disponibilidade/{{ lanc.id }}/editar">
+      <div>
+        <label>Quantidade disponível</label>
+        <input type="number" name="quantidade_disponivel" value="{{ lanc.quantidade_disponivel }}" required>
+      </div>
+      <div>
+        <label>Quantidade indisponível</label>
+        <input type="number" name="quantidade_indisponivel" value="{{ lanc.quantidade_indisponivel }}" required>
+      </div>
+      <button class="btn btn-primary" type="submit">Salvar</button>
+    </form>
+    <form method="post" action="/gerente/exercicios/{{ ex.id }}/lancamentos/disponibilidade/{{ lanc.id }}/excluir"
+          onsubmit="return confirm('Excluir este lançamento?');" style="margin-top:10px;">
+      <button class="btn btn-danger" type="submit">Excluir lançamento</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
