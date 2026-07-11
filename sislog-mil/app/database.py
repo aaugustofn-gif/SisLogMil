@@ -14,6 +14,13 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./sislog.db")
 
+# Garante que o SQLAlchemy use o driver PyMySQL (que instalamos via
+# requirements.txt), e não o MySQLdb (que não está instalado). Isso é
+# necessário porque a connection string copiada do TiDB Cloud costuma
+# vir apenas como "mysql://...", sem especificar o driver.
+if DATABASE_URL.startswith("mysql://"):
+    DATABASE_URL = DATABASE_URL.replace("mysql://", "mysql+pymysql://", 1)
+
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 
 # pool_recycle=280: o TiDB Cloud Starter fecha conexões ociosas depois de
