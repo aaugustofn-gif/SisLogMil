@@ -17,7 +17,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", "troque-esta-chave-em-producao-no-render")
 ALGORITHM = "HS256"
 EXPIRE_HOURS = 12
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 
 def hash_senha(senha: str) -> str:
