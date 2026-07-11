@@ -2,6 +2,13 @@
 {% block title %}{{ ex.nome }} — Painel Logístico{% endblock %}
 {% block extra_head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script>
+  // Registrado uma única vez; cada gráfico decide se usa (via plugins.datalabels)
+  if (window.Chart && window.ChartDataLabels) {
+    Chart.register(ChartDataLabels);
+  }
+</script>
 <style>
   @media print {
     .topbar .actions, .tabs { display: none !important; }
@@ -89,7 +96,14 @@
               }],
             },
             options: {
-              plugins: { legend: { display: false } },
+              plugins: {
+                legend: { display: false },
+                datalabels: {
+                  color: "#0b1220",
+                  font: { weight: "bold", size: 13 },
+                  formatter: (valor) => valor,
+                },
+              },
               responsive: true,
             },
           });
@@ -113,6 +127,13 @@
                   borderDash: [6, 4],
                   pointRadius: 0,
                   borderWidth: 2,
+                  datalabels: {
+                    color: "#3b82f6",
+                    font: { weight: "bold", size: 12 },
+                    align: "bottom",
+                    display: (ctx) => ctx.dataIndex === ctx.dataset.data.length - 1,
+                    formatter: (valor) => valor,
+                  },
                 },
                 {
                   label: "Acumulado",
@@ -123,11 +144,22 @@
                   tension: 0.25,
                   pointRadius: 3,
                   borderWidth: 2,
+                  datalabels: {
+                    color: "#22c55e",
+                    font: { weight: "bold", size: 12 },
+                    align: "top",
+                    display: (ctx) => ctx.dataIndex === ctx.dataset.data.length - 1,
+                    formatter: (valor) => valor,
+                  },
                 },
               ],
             },
             options: {
-              plugins: { legend: { display: false } },
+              plugins: {
+                legend: { display: false },
+                datalabels: { display: false },
+              },
+              layout: { padding: { top: 20, bottom: 10 } },
               responsive: true,
               scales: {
                 x: { grid: { color: "#1e2a47" }, ticks: { color: "#93a0bd" } },
