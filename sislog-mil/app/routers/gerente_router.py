@@ -17,7 +17,14 @@ templates = Jinja2Templates(directory="app/templates")
 
 
 def _exercicio_do_gerente(db: Session, exercicio_id: int, gerente_id: int) -> Exercicio:
-    ex = db.query(Exercicio).filter(Exercicio.id == exercicio_id, Exercicio.gerente_id == gerente_id).first()
+    """
+    Apesar do nome (mantido para não precisar alterar todas as chamadas),
+    esta função não restringe mais o acesso pelo gerente que criou o
+    exercício: qualquer gerente pode ver e editar qualquer exercício,
+    já que todos pertencem à FFE como um todo. O parâmetro gerente_id
+    não é mais usado para filtrar, só fica disponível caso seja útil no futuro.
+    """
+    ex = db.query(Exercicio).filter(Exercicio.id == exercicio_id).first()
     if not ex:
         raise HTTPException(404, "Exercício não encontrado.")
     return ex
@@ -26,12 +33,7 @@ def _exercicio_do_gerente(db: Session, exercicio_id: int, gerente_id: int) -> Ex
 @router.get("")
 def dashboard(request: Request, db: Session = Depends(get_db)):
     sessao = exigir_perfil(request, "gerente")
-    exercicios = (
-        db.query(Exercicio)
-        .filter(Exercicio.gerente_id == sessao["id"])
-        .order_by(Exercicio.data_inicio.desc())
-        .all()
-    )
+    exercicios = db.query(Exercicio).order_by(Exercicio.data_inicio.desc()).all()
     return templates.TemplateResponse(
         "gerente/dashboard.html", {"request": request, "sessao": sessao, "exercicios": exercicios}
     )

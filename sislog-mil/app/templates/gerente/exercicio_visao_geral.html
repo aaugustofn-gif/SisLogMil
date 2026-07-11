@@ -10,6 +10,7 @@
     <h2 style="margin:10px 0 4px;">{{ ex.nome }}</h2>
     <p class="hint">📍 {{ ex.local }}</p>
     <p class="hint">📅 {{ ex.data_inicio.strftime('%d/%m/%Y') }} — {{ ex.data_fim.strftime('%d/%m/%Y') }}</p>
+    <p class="hint">👤 Criado por {{ ex.gerente.nome }}</p>
     <a class="btn btn-sm" href="/gerente/exercicios/{{ ex.id }}/editar">Editar dados do exercício</a>
   </div>
 

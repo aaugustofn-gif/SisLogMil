@@ -17,7 +17,7 @@
 
 <div class="container">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-    <h2 style="margin:0;font-size:18px;">Meus exercícios</h2>
+    <h2 style="margin:0;font-size:18px;">Exercícios da FFE</h2>
     <a class="btn btn-primary" href="/gerente/exercicios/novo">+ Novo exercício</a>
   </div>
 
@@ -30,6 +30,7 @@
       <h3 style="margin-top:10px;">{{ ex.nome }}</h3>
       <p class="hint" style="margin:4px 0;">📍 {{ ex.local }}</p>
       <p class="hint" style="margin:4px 0;">📅 {{ ex.data_inicio.strftime('%d/%m/%Y') }} — {{ ex.data_fim.strftime('%d/%m/%Y') }}</p>
+      <p class="hint" style="margin:4px 0;">👤 Criado por {{ ex.gerente.nome }}</p>
     </a>
     {% endfor %}
   </div>
