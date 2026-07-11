@@ -100,7 +100,7 @@
                 legend: { display: false },
                 datalabels: {
                   color: "#0b1220",
-                  font: { weight: "bold", size: 13 },
+                  font: { weight: "bold", size: 39 },
                   formatter: (valor) => valor,
                 },
               },
@@ -113,60 +113,103 @@
           <div class="legend">
             <span><span class="dot dot-blue"></span>Autorizado: {{ g.autorizado }}</span>
             <span><span class="dot dot-green"></span>Acumulado: {{ g.total_atual }}</span>
+            {% if g.marco1_nome and g.marco1_valor is not none %}
+            <span><span class="dot" style="background:#eab308;"></span>{{ g.marco1_nome }}: {{ g.marco1_valor }}</span>
+            {% endif %}
+            {% if g.marco2_nome and g.marco2_valor is not none %}
+            <span><span class="dot" style="background:#a855f7;"></span>{{ g.marco2_nome }}: {{ g.marco2_valor }}</span>
+            {% endif %}
           </div>
           <script>
-          new Chart(document.getElementById("chart-{{ g.item.id }}"), {
-            type: "line",
-            data: {
-              labels: {{ g.rotulos | tojson }},
-              datasets: [
-                {
-                  label: "Autorizado",
-                  data: Array({{ g.rotulos | length }}).fill({{ g.autorizado }}),
-                  borderColor: "#3b82f6",
-                  borderDash: [6, 4],
-                  pointRadius: 0,
-                  borderWidth: 2,
-                  datalabels: {
-                    color: "#3b82f6",
-                    font: { weight: "bold", size: 12 },
-                    align: "bottom",
-                    display: (ctx) => ctx.dataIndex === ctx.dataset.data.length - 1,
-                    formatter: (valor) => valor,
-                  },
+          (function() {
+            var datasets = [
+              {
+                label: "Autorizado",
+                data: Array({{ g.rotulos | length }}).fill({{ g.autorizado }}),
+                borderColor: "#3b82f6",
+                borderDash: [6, 4],
+                pointRadius: 0,
+                borderWidth: 2,
+                datalabels: {
+                  color: "#3b82f6",
+                  font: { weight: "bold", size: 12 },
+                  align: "bottom",
+                  display: (ctx) => ctx.dataIndex === ctx.dataset.data.length - 1,
+                  formatter: (valor) => valor,
                 },
-                {
-                  label: "Acumulado",
-                  data: {{ g.acumulado | tojson }},
-                  borderColor: "#22c55e",
-                  backgroundColor: "rgba(34,197,94,0.08)",
-                  fill: true,
-                  tension: 0.25,
-                  pointRadius: 3,
-                  borderWidth: 2,
-                  datalabels: {
-                    color: "#22c55e",
-                    font: { weight: "bold", size: 12 },
-                    align: "top",
-                    display: (ctx) => ctx.dataIndex === ctx.dataset.data.length - 1,
-                    formatter: (valor) => valor,
-                  },
+              },
+              {
+                label: "Acumulado",
+                data: {{ g.acumulado | tojson }},
+                borderColor: "#22c55e",
+                backgroundColor: "rgba(34,197,94,0.08)",
+                fill: true,
+                tension: 0.25,
+                pointRadius: 3,
+                borderWidth: 2,
+                datalabels: {
+                  color: "#22c55e",
+                  font: { weight: "bold", size: 12 },
+                  align: "top",
+                  display: (ctx) => ctx.dataIndex === ctx.dataset.data.length - 1,
+                  formatter: (valor) => valor,
                 },
-              ],
-            },
-            options: {
-              plugins: {
-                legend: { display: false },
-                datalabels: { display: false },
               },
-              layout: { padding: { top: 20, bottom: 10 } },
-              responsive: true,
-              scales: {
-                x: { grid: { color: "#1e2a47" }, ticks: { color: "#93a0bd" } },
-                y: { grid: { color: "#1e2a47" }, ticks: { color: "#93a0bd" }, beginAtZero: true },
+            ];
+
+            {% if g.marco1_nome and g.marco1_valor is not none %}
+            datasets.push({
+              label: {{ g.marco1_nome | tojson }},
+              data: Array({{ g.rotulos | length }}).fill({{ g.marco1_valor }}),
+              borderColor: "#eab308",
+              borderDash: [3, 3],
+              pointRadius: 0,
+              borderWidth: 2,
+              datalabels: {
+                color: "#eab308",
+                font: { weight: "bold", size: 11 },
+                align: "bottom",
+                display: (ctx) => ctx.dataIndex === ctx.dataset.data.length - 1,
+                formatter: (valor) => {{ g.marco1_nome | tojson }} + ": " + valor,
               },
-            },
-          });
+            });
+            {% endif %}
+
+            {% if g.marco2_nome and g.marco2_valor is not none %}
+            datasets.push({
+              label: {{ g.marco2_nome | tojson }},
+              data: Array({{ g.rotulos | length }}).fill({{ g.marco2_valor }}),
+              borderColor: "#a855f7",
+              borderDash: [3, 3],
+              pointRadius: 0,
+              borderWidth: 2,
+              datalabels: {
+                color: "#a855f7",
+                font: { weight: "bold", size: 11 },
+                align: "top",
+                display: (ctx) => ctx.dataIndex === ctx.dataset.data.length - 1,
+                formatter: (valor) => {{ g.marco2_nome | tojson }} + ": " + valor,
+              },
+            });
+            {% endif %}
+
+            new Chart(document.getElementById("chart-{{ g.item.id }}"), {
+              type: "line",
+              data: { labels: {{ g.rotulos | tojson }}, datasets: datasets },
+              options: {
+                plugins: {
+                  legend: { display: false },
+                  datalabels: { display: false },
+                },
+                layout: { padding: { top: 20, bottom: 10 } },
+                responsive: true,
+                scales: {
+                  x: { grid: { color: "#1e2a47" }, ticks: { color: "#93a0bd" } },
+                  y: { grid: { color: "#1e2a47" }, ticks: { color: "#93a0bd" }, beginAtZero: true },
+                },
+              },
+            });
+          })();
           </script>
         {% endif %}
       </div>

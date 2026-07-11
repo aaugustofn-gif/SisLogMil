@@ -195,6 +195,10 @@ def criar_item(
     nome: str = Form(...),
     unidade: str = Form(""),
     consumo_autorizado: str = Form(""),
+    marco1_nome: str = Form(""),
+    marco1_valor: str = Form(""),
+    marco2_nome: str = Form(""),
+    marco2_valor: str = Form(""),
     db: Session = Depends(get_db),
 ):
     sessao = exigir_perfil(request, "gerente")
@@ -205,6 +209,12 @@ def criar_item(
     if cat.tipo_grafico == "consumo":
         item.unidade = unidade.strip() or "Unidades"
         item.consumo_autorizado = float(consumo_autorizado) if consumo_autorizado else 0
+        if marco1_nome.strip() and marco1_valor.strip():
+            item.marco1_nome = marco1_nome.strip()
+            item.marco1_valor = float(marco1_valor)
+        if marco2_nome.strip() and marco2_valor.strip():
+            item.marco2_nome = marco2_nome.strip()
+            item.marco2_valor = float(marco2_valor)
 
     db.add(item)
     try:
@@ -223,6 +233,10 @@ def editar_item(
     nome: str = Form(...),
     unidade: str = Form(""),
     consumo_autorizado: str = Form(""),
+    marco1_nome: str = Form(""),
+    marco1_valor: str = Form(""),
+    marco2_nome: str = Form(""),
+    marco2_valor: str = Form(""),
     db: Session = Depends(get_db),
 ):
     sessao = exigir_perfil(request, "gerente")
@@ -235,6 +249,10 @@ def editar_item(
     if cat.tipo_grafico == "consumo":
         item.unidade = unidade.strip() or "Unidades"
         item.consumo_autorizado = float(consumo_autorizado) if consumo_autorizado else 0
+        item.marco1_nome = marco1_nome.strip() or None
+        item.marco1_valor = float(marco1_valor) if marco1_valor.strip() else None
+        item.marco2_nome = marco2_nome.strip() or None
+        item.marco2_valor = float(marco2_valor) if marco2_valor.strip() else None
     db.commit()
     return RedirectResponse(f"/gerente/exercicios/{ex.id}/categorias/{cat.id}", status_code=303)
 

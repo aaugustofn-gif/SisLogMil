@@ -28,10 +28,23 @@ def iniciar():
     # Isso evita ter que mexer manualmente no banco a cada pequena mudança.
     from sqlalchemy import inspect, text
     inspecao = inspect(engine)
+
     colunas_disponibilidade = [c["name"] for c in inspecao.get_columns("lancamentos_disponibilidade")]
     if "editado" not in colunas_disponibilidade:
         with engine.begin() as conn:
             conn.execute(text("ALTER TABLE lancamentos_disponibilidade ADD COLUMN editado INTEGER NOT NULL DEFAULT 0"))
+
+    colunas_itens = [c["name"] for c in inspecao.get_columns("itens")]
+    novas_colunas_itens = {
+        "marco1_nome": "VARCHAR(60)",
+        "marco1_valor": "FLOAT",
+        "marco2_nome": "VARCHAR(60)",
+        "marco2_valor": "FLOAT",
+    }
+    for coluna, tipo_sql in novas_colunas_itens.items():
+        if coluna not in colunas_itens:
+            with engine.begin() as conn:
+                conn.execute(text(f"ALTER TABLE itens ADD COLUMN {coluna} {tipo_sql}"))
 
     # Garante que sempre exista um administrador para o primeiro acesso.
     # Login e senha padrão podem ser sobrescritos por variáveis de ambiente

@@ -33,8 +33,25 @@
         <input type="text" name="unidade" placeholder="Ex: Litros, Projéteis, kg" required>
       </div>
       <div>
-        <label>Consumo autorizado</label>
+        <label>Quota final autorizada (a que já usamos hoje)</label>
         <input type="number" step="0.01" name="consumo_autorizado" required>
+      </div>
+      <p class="hint" style="margin:6px 0 0;">Linhas de referência extras, opcionais (ex: fases do exercício). Deixe em branco se não usar.</p>
+      <div>
+        <label>Nome da 1ª fase (ex: Mobilização)</label>
+        <input type="text" name="marco1_nome" placeholder="Opcional">
+      </div>
+      <div>
+        <label>Limite da 1ª fase</label>
+        <input type="number" step="0.01" name="marco1_valor" placeholder="Opcional">
+      </div>
+      <div>
+        <label>Nome da 2ª fase (ex: Execução)</label>
+        <input type="text" name="marco2_nome" placeholder="Opcional">
+      </div>
+      <div>
+        <label>Limite da 2ª fase</label>
+        <input type="number" step="0.01" name="marco2_valor" placeholder="Opcional">
       </div>
       {% endif %}
       <button class="btn btn-primary" type="submit">Adicionar</button>
@@ -59,11 +76,15 @@
         <tr>
           <td colspan="{{ 4 if cat.tipo_grafico == 'consumo' else 2 }}" style="padding:0;border:none;">
           <form method="post" action="/gerente/exercicios/{{ ex.id }}/categorias/{{ cat.id }}/itens/{{ item.id }}/editar"
-                style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--card-border);">
-            <input type="text" name="nome" value="{{ item.nome }}" style="max-width:200px;">
+                style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 12px;border-bottom:1px solid var(--card-border);">
+            <input type="text" name="nome" value="{{ item.nome }}" style="max-width:160px;" placeholder="Nome">
             {% if cat.tipo_grafico == 'consumo' %}
-            <input type="text" name="unidade" value="{{ item.unidade }}" style="max-width:120px;">
-            <input type="number" step="0.01" name="consumo_autorizado" value="{{ item.consumo_autorizado }}" style="max-width:130px;">
+            <input type="text" name="unidade" value="{{ item.unidade }}" style="max-width:100px;" placeholder="Unidade">
+            <input type="number" step="0.01" name="consumo_autorizado" value="{{ item.consumo_autorizado }}" style="max-width:110px;" title="Quota final autorizada">
+            <input type="text" name="marco1_nome" value="{{ item.marco1_nome or '' }}" style="max-width:110px;" placeholder="Nome fase 1">
+            <input type="number" step="0.01" name="marco1_valor" value="{{ item.marco1_valor if item.marco1_valor is not none else '' }}" style="max-width:100px;" placeholder="Limite fase 1">
+            <input type="text" name="marco2_nome" value="{{ item.marco2_nome or '' }}" style="max-width:110px;" placeholder="Nome fase 2">
+            <input type="number" step="0.01" name="marco2_valor" value="{{ item.marco2_valor if item.marco2_valor is not none else '' }}" style="max-width:100px;" placeholder="Limite fase 2">
             {% endif %}
             <button class="btn btn-sm" type="submit">Salvar</button>
             <button class="btn btn-sm btn-danger" type="submit"

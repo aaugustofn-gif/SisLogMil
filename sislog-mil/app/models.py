@@ -132,6 +132,14 @@ class Item(Base):
     unidade = Column(String(30), nullable=True)          # usado só quando tipo_grafico = "consumo"
     consumo_autorizado = Column(Float, nullable=True)     # usado só quando tipo_grafico = "consumo"
 
+    # Linhas de referência extras e opcionais para o gráfico de consumo
+    # (ex: "Mobilização", "Execução"). Se o nome ou o valor não forem
+    # preenchidos, a linha correspondente simplesmente não aparece.
+    marco1_nome = Column(String(60), nullable=True)
+    marco1_valor = Column(Float, nullable=True)
+    marco2_nome = Column(String(60), nullable=True)
+    marco2_valor = Column(Float, nullable=True)
+
     categoria = relationship("Categoria", back_populates="itens")
     lancamentos_disponibilidade = relationship("LancamentoDisponibilidade", back_populates="item", cascade="all, delete-orphan")
     lancamentos_consumo = relationship("LancamentoConsumo", back_populates="item", cascade="all, delete-orphan")

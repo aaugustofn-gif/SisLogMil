@@ -52,6 +52,10 @@ def _dados_consumo(db: Session, item: Item, data_inicio: date, data_fim: date) -
         "acumulado": acumulado_serie,
         "autorizado": item.consumo_autorizado or 0,
         "total_atual": acumulado_serie[-1] if acumulado_serie else 0,
+        "marco1_nome": item.marco1_nome,
+        "marco1_valor": item.marco1_valor,
+        "marco2_nome": item.marco2_nome,
+        "marco2_valor": item.marco2_valor,
     }
 
 
