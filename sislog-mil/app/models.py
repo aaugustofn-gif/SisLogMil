@@ -149,6 +149,7 @@ class LancamentoDisponibilidade(Base):
     data = Column(Date, nullable=False, default=date.today)
     quantidade_disponivel = Column(Integer, nullable=False, default=0)
     quantidade_indisponivel = Column(Integer, nullable=False, default=0)
+    editado = Column(Integer, nullable=False, default=0)  # 0 = ainda pode ser editado 1x pelo usuário; 1 = já editado (só gerente altera)
     criado_em = Column(DateTime, default=datetime.utcnow)
 
     item = relationship("Item", back_populates="lancamentos_disponibilidade")

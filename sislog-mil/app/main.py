@@ -23,6 +23,16 @@ def iniciar():
     # Cria as tabelas caso ainda não existam (não apaga dados existentes)
     Base.metadata.create_all(bind=engine)
 
+    # Migração simples e automática: adiciona colunas novas que passaram a
+    # existir no modelo mas ainda não existem na tabela já criada em produção.
+    # Isso evita ter que mexer manualmente no banco a cada pequena mudança.
+    from sqlalchemy import inspect, text
+    inspecao = inspect(engine)
+    colunas_disponibilidade = [c["name"] for c in inspecao.get_columns("lancamentos_disponibilidade")]
+    if "editado" not in colunas_disponibilidade:
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE lancamentos_disponibilidade ADD COLUMN editado INTEGER NOT NULL DEFAULT 0"))
+
     # Garante que sempre exista um administrador para o primeiro acesso.
     # Login e senha padrão podem ser sobrescritos por variáveis de ambiente
     # no painel do Render (ADMIN_LOGIN / ADMIN_SENHA).

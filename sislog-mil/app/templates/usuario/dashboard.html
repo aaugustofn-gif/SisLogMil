@@ -15,71 +15,99 @@
 </div>
 
 <div class="container">
-  {% for cat in ex.categorias %}
-  <div class="card" style="margin-bottom:24px;">
-    <h3 style="margin-top:0;">{{ cat.nome }}</h3>
+  {% if sucesso %}
+  <p class="hint" style="color:#22c55e;margin-bottom:16px;">✓ Lançamento registrado com sucesso.</p>
+  {% endif %}
+  {% if bloqueados %}
+  <p class="error" style="margin-bottom:16px;">
+    Não foi possível atualizar: {{ bloqueados | join(", ") }} — o prazo de 10 minutos ou o limite de uma edição já passou. Peça para o gerente ajustar.
+  </p>
+  {% endif %}
+  {% if request.query_params.get("erro") == "prazo_consumo" %}
+  <p class="error" style="margin-bottom:16px;">Não foi possível desfazer: o prazo de 10 minutos já passou. Peça para o gerente remover.</p>
+  {% endif %}
 
-    {% if cat.tipo_grafico == "disponibilidade" %}
-      {% if cat.itens %}
-      <div class="grid">
-        {% for item in cat.itens %}
-        {% set meu = meus_disponibilidade.get(item.id) %}
-        <div class="card" style="background:var(--bg-alt);">
-          <h3 style="font-size:15px;">{{ item.nome }}</h3>
-          <form class="stack" method="post" action="/usuario/disponibilidade/{{ item.id }}">
-            <div>
-              <label>Quantidade disponível</label>
-              <input type="number" min="0" name="quantidade_disponivel" value="{{ meu.quantidade_disponivel if meu else '' }}" required>
-            </div>
-            <div>
-              <label>Quantidade indisponível</label>
-              <input type="number" min="0" name="quantidade_indisponivel" value="{{ meu.quantidade_indisponivel if meu else '' }}" required>
-            </div>
-            <button class="btn btn-primary btn-sm" type="submit">{{ "Atualizar" if meu else "Lançar" }}</button>
-          </form>
-        </div>
-        {% endfor %}
-      </div>
-      {% else %}
-      <p class="hint">Nenhum item cadastrado nesta categoria ainda.</p>
-      {% endif %}
+  <form method="post" action="/usuario/lancar-tudo">
+    {% for cat in ex.categorias %}
+    <div class="card" style="margin-bottom:24px;">
+      <h3 style="margin-top:0;">{{ cat.nome }}</h3>
 
-    {% else %}
-      {% if cat.itens %}
-      <div class="grid">
-        {% for item in cat.itens %}
-        {% set meus = meus_consumo.get(item.id, []) %}
-        <div class="card" style="background:var(--bg-alt);">
-          <h3 style="font-size:15px;">{{ item.nome }} <span class="unit">{{ item.unidade }}</span></h3>
-          <form class="stack" method="post" action="/usuario/consumo/{{ item.id }}">
-            <div>
-              <label>Quantidade consumida agora</label>
-              <input type="number" step="0.01" min="0" name="quantidade" required>
-            </div>
-            <button class="btn btn-primary btn-sm" type="submit">Lançar</button>
-          </form>
-          {% if meus %}
-          <p class="hint" style="margin-top:12px;margin-bottom:4px;">Já lançado hoje:</p>
-          {% for l in meus %}
-          <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:4px 0;border-top:1px solid var(--card-border);">
-            <span>{{ l.quantidade }} {{ item.unidade }}</span>
-            <form method="post" action="/usuario/consumo/{{ item.id }}/lancamento/{{ l.id }}/excluir"
-                  onsubmit="return confirm('Desfazer este lançamento?');">
-              <button class="btn btn-sm btn-danger" type="submit" style="padding:2px 8px;">Desfazer</button>
-            </form>
+      {% if cat.tipo_grafico == "disponibilidade" %}
+        {% if cat.itens %}
+        <div class="grid">
+          {% for item in cat.itens %}
+          {% set info = meus_disponibilidade.get(item.id) %}
+          {% set lanc = info.lanc if info else None %}
+          <div class="card" style="background:var(--bg-alt);">
+            <h3 style="font-size:15px;">{{ item.nome }}</h3>
+            {% if info and info.editavel %}
+              <div class="stack">
+                <div>
+                  <label>Quantidade disponível</label>
+                  <input type="number" min="0" name="disp_{{ item.id }}_disponivel" value="{{ lanc.quantidade_disponivel if lanc else '' }}">
+                </div>
+                <div>
+                  <label>Quantidade indisponível</label>
+                  <input type="number" min="0" name="disp_{{ item.id }}_indisponivel" value="{{ lanc.quantidade_indisponivel if lanc else '' }}">
+                </div>
+              </div>
+            {% else %}
+              <p class="hint">Disponível: {{ lanc.quantidade_disponivel }} · Indisponível: {{ lanc.quantidade_indisponivel }}</p>
+              <p class="hint" style="color:#eab308;">🔒 Já lançado — só o gerente pode alterar agora.</p>
+            {% endif %}
           </div>
           {% endfor %}
-          {% endif %}
         </div>
-        {% endfor %}
-      </div>
+        {% else %}
+        <p class="hint">Nenhum item cadastrado nesta categoria ainda.</p>
+        {% endif %}
+
       {% else %}
-      <p class="hint">Nenhum item cadastrado nesta categoria ainda.</p>
+        {% if cat.itens %}
+        <div class="grid">
+          {% for item in cat.itens %}
+          {% set meus = meus_consumo.get(item.id, []) %}
+          <div class="card" style="background:var(--bg-alt);">
+            <h3 style="font-size:15px;">{{ item.nome }} <span class="unit">{{ item.unidade }}</span></h3>
+            <div class="stack">
+              <div>
+                <label>Quantidade consumida agora (deixe em branco se não for lançar)</label>
+                <input type="number" step="0.01" min="0" name="consumo_{{ item.id }}">
+              </div>
+            </div>
+            {% if meus %}
+            <p class="hint" style="margin-top:12px;margin-bottom:4px;">Já lançado hoje:</p>
+            {% for m in meus %}
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:4px 0;border-top:1px solid var(--card-border);">
+              <span>{{ m.lanc.quantidade }} {{ item.unidade }}</span>
+              {% if m.editavel %}
+              <button class="btn btn-sm btn-danger" type="submit"
+                      formaction="/usuario/consumo/{{ item.id }}/lancamento/{{ m.lanc.id }}/excluir"
+                      formmethod="post"
+                      onclick="return confirm('Desfazer este lançamento?');" style="padding:2px 8px;">Desfazer</button>
+              {% else %}
+              <span class="hint" style="color:#eab308;">🔒 prazo expirado</span>
+              {% endif %}
+            </div>
+            {% endfor %}
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="hint">Nenhum item cadastrado nesta categoria ainda.</p>
+        {% endif %}
       {% endif %}
+    </div>
+    {% else %}
+    <div class="card center-empty">O gerente ainda não cadastrou categorias para este exercício.</div>
+    {% endfor %}
+
+    {% if ex.categorias %}
+    <button class="btn btn-primary" type="submit" style="width:100%;padding:16px;font-size:16px;">
+      Lançar tudo agora
+    </button>
     {% endif %}
-  </div>
-  {% else %}
-  <div class="card center-empty">O gerente ainda não cadastrou categorias para este exercício.</div>
-  {% endfor %}
+  </form>
 </div>
 {% endblock %}
