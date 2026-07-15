@@ -30,12 +30,27 @@ def _pode_editar(lanc: LancamentoDisponibilidade) -> bool:
     return (datetime.utcnow() - lanc.criado_em) <= JANELA_EDICAO
 
 
+def _dia_valido(ex, valor: str) -> date:
+    """Converte e limita a data escolhida ao intervalo do exercício (não deixa
+    escolher antes do início nem depois de hoje/fim do exercício)."""
+    try:
+        dia = datetime.strptime(valor, "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        return date.today()
+    limite_max = min(date.today(), ex.data_fim)
+    if dia < ex.data_inicio:
+        return ex.data_inicio
+    if dia > limite_max:
+        return limite_max
+    return dia
+
+
 @router.get("")
 def dashboard(request: Request, db: Session = Depends(get_db)):
     sessao = exigir_perfil(request, "usuario")
     usuario = _usuario_atual(db, sessao)
     ex = usuario.exercicio
-    hoje = date.today()
+    dia = _dia_valido(ex, request.query_params.get("data", ""))
 
     meus_disponibilidade = {}
     for cat in ex.categorias:
@@ -47,7 +62,7 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
                 .filter(
                     LancamentoDisponibilidade.item_id == item.id,
                     LancamentoDisponibilidade.usuario_id == usuario.id,
-                    LancamentoDisponibilidade.data == hoje,
+                    LancamentoDisponibilidade.data == dia,
                 )
                 .first()
             )
@@ -66,7 +81,7 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
                 .filter(
                     LancamentoConsumo.item_id == item.id,
                     LancamentoConsumo.usuario_id == usuario.id,
-                    LancamentoConsumo.data == hoje,
+                    LancamentoConsumo.data == dia,
                 )
                 .order_by(LancamentoConsumo.criado_em.desc())
                 .all()
@@ -86,7 +101,10 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
             "sessao": sessao,
             "usuario": usuario,
             "ex": ex,
-            "hoje": hoje,
+            "dia": dia,
+            "hoje": date.today(),
+            "data_min": ex.data_inicio.isoformat(),
+            "data_max": min(date.today(), ex.data_fim).isoformat(),
             "meus_disponibilidade": meus_disponibilidade,
             "meus_consumo": meus_consumo,
             "bloqueados": bloqueados,
@@ -98,12 +116,12 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
 @router.post("/lancar-tudo")
 async def lancar_tudo(request: Request, db: Session = Depends(get_db)):
     """Processa, em uma única submissão, todos os lançamentos de disponibilidade
-    e consumo preenchidos na tela do usuário."""
+    e consumo preenchidos na tela do usuário, para a data escolhida no formulário."""
     sessao = exigir_perfil(request, "usuario")
     usuario = _usuario_atual(db, sessao)
     ex = usuario.exercicio
-    hoje = date.today()
     form = await request.form()
+    dia = _dia_valido(ex, form.get("data", ""))
 
     bloqueados = []
 
@@ -123,13 +141,13 @@ async def lancar_tudo(request: Request, db: Session = Depends(get_db)):
                     .filter(
                         LancamentoDisponibilidade.item_id == item.id,
                         LancamentoDisponibilidade.usuario_id == usuario.id,
-                        LancamentoDisponibilidade.data == hoje,
+                        LancamentoDisponibilidade.data == dia,
                     )
                     .first()
                 )
                 if lanc is None:
                     db.add(LancamentoDisponibilidade(
-                        item_id=item.id, usuario_id=usuario.id, data=hoje,
+                        item_id=item.id, usuario_id=usuario.id, data=dia,
                         quantidade_disponivel=disponivel, quantidade_indisponivel=indisponivel,
                     ))
                 elif _pode_editar(lanc):
@@ -145,12 +163,12 @@ async def lancar_tudo(request: Request, db: Session = Depends(get_db)):
                 if not bruto:
                     continue
                 db.add(LancamentoConsumo(
-                    item_id=item.id, usuario_id=usuario.id, data=hoje, quantidade=float(bruto),
+                    item_id=item.id, usuario_id=usuario.id, data=dia, quantidade=float(bruto),
                 ))
 
     db.commit()
 
-    destino = "/usuario?ok=1"
+    destino = f"/usuario?data={dia.isoformat()}&ok=1"
     if bloqueados:
         destino += "&bloqueados=" + quote(",".join(bloqueados))
     return RedirectResponse(destino, status_code=303)
@@ -165,11 +183,12 @@ def excluir_meu_consumo(item_id: int, lanc_id: int, request: Request, db: Sessio
     lanc = db.query(LancamentoConsumo).get(lanc_id)
     if not lanc or lanc.item_id != item_id or lanc.usuario_id != usuario.id:
         raise HTTPException(404)
+    dia_da_entrada = lanc.data.isoformat()
     if (datetime.utcnow() - lanc.criado_em) > JANELA_EDICAO:
-        return RedirectResponse("/usuario?erro=prazo_consumo", status_code=303)
+        return RedirectResponse(f"/usuario?data={dia_da_entrada}&erro=prazo_consumo", status_code=303)
     db.delete(lanc)
     db.commit()
-    return RedirectResponse("/usuario", status_code=303)
+    return RedirectResponse(f"/usuario?data={dia_da_entrada}", status_code=303)
 
 
 @router.get("/senha")

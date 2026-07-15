@@ -4,7 +4,7 @@
 <div class="topbar">
   <div class="brand">
     <div>
-      <span class="eyebrow">{{ ex.nome }} — {{ hoje.strftime('%d/%m/%Y') }}</span>
+      <span class="eyebrow">{{ ex.nome }}</span>
       <h1>Olá, {{ usuario.nome }}</h1>
     </div>
   </div>
@@ -15,8 +15,23 @@
 </div>
 
 <div class="container">
+  <div class="card" style="margin-bottom:20px;max-width:420px;">
+    <form method="get" action="/usuario" class="stack" style="flex-direction:row;align-items:flex-end;gap:10px;">
+      <div style="flex:1;">
+        <label>Lançando dados do dia</label>
+        <input type="date" name="data" value="{{ dia.isoformat() }}" min="{{ data_min }}" max="{{ data_max }}">
+      </div>
+      <button class="btn btn-sm" type="submit">Ver este dia</button>
+    </form>
+    {% if dia != hoje %}
+    <p class="hint" style="color:#eab308;margin-top:10px;margin-bottom:0;">
+      ⚠️ Você está lançando para {{ dia.strftime('%d/%m/%Y') }}, não para hoje ({{ hoje.strftime('%d/%m/%Y') }}).
+    </p>
+    {% endif %}
+  </div>
+
   {% if sucesso %}
-  <p class="hint" style="color:#22c55e;margin-bottom:16px;">✓ Lançamento registrado com sucesso.</p>
+  <p class="hint" style="color:#22c55e;margin-bottom:16px;">✓ Lançamento registrado com sucesso para {{ dia.strftime('%d/%m/%Y') }}.</p>
   {% endif %}
   {% if bloqueados %}
   <p class="error" style="margin-bottom:16px;">
@@ -28,6 +43,7 @@
   {% endif %}
 
   <form method="post" action="/usuario/lancar-tudo">
+    <input type="hidden" name="data" value="{{ dia.isoformat() }}">
     {% for cat in ex.categorias %}
     <div class="card" style="margin-bottom:24px;">
       <h3 style="margin-top:0;">{{ cat.nome }}</h3>
@@ -71,12 +87,12 @@
             <h3 style="font-size:15px;">{{ item.nome }} <span class="unit">{{ item.unidade }}</span></h3>
             <div class="stack">
               <div>
-                <label>Quantidade consumida agora (deixe em branco se não for lançar)</label>
+                <label>Quantidade consumida nesse dia (deixe em branco se não for lançar)</label>
                 <input type="number" step="0.01" min="0" name="consumo_{{ item.id }}">
               </div>
             </div>
             {% if meus %}
-            <p class="hint" style="margin-top:12px;margin-bottom:4px;">Já lançado hoje:</p>
+            <p class="hint" style="margin-top:12px;margin-bottom:4px;">Já lançado nesse dia:</p>
             {% for m in meus %}
             <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:4px 0;border-top:1px solid var(--card-border);">
               <span>{{ m.lanc.quantidade }} {{ item.unidade }}</span>

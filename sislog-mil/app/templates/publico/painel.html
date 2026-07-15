@@ -130,13 +130,7 @@
                 borderDash: [6, 4],
                 pointRadius: 0,
                 borderWidth: 2,
-                datalabels: {
-                  color: "#3b82f6",
-                  font: { weight: "bold", size: 12 },
-                  align: "bottom",
-                  display: (ctx) => ctx.dataIndex === ctx.dataset.data.length - 1,
-                  formatter: (valor) => valor,
-                },
+              datalabels: { display: false },
               },
               {
                 label: "Acumulado",
@@ -150,7 +144,8 @@
                 datalabels: {
                   color: "#22c55e",
                   font: { weight: "bold", size: 12 },
-                  align: "top",
+                  align: "left",
+                  clamp: true,
                   display: (ctx) => ctx.dataIndex === ctx.dataset.data.length - 1,
                   formatter: (valor) => valor,
                 },
@@ -165,13 +160,7 @@
               borderDash: [3, 3],
               pointRadius: 0,
               borderWidth: 2,
-              datalabels: {
-                color: "#eab308",
-                font: { weight: "bold", size: 11 },
-                align: "bottom",
-                display: (ctx) => ctx.dataIndex === ctx.dataset.data.length - 1,
-                formatter: (valor) => {{ g.marco1_nome | tojson }} + ": " + valor,
-              },
+              datalabels: { display: false },
             });
             {% endif %}
 
@@ -183,13 +172,7 @@
               borderDash: [3, 3],
               pointRadius: 0,
               borderWidth: 2,
-              datalabels: {
-                color: "#a855f7",
-                font: { weight: "bold", size: 11 },
-                align: "top",
-                display: (ctx) => ctx.dataIndex === ctx.dataset.data.length - 1,
-                formatter: (valor) => {{ g.marco2_nome | tojson }} + ": " + valor,
-              },
+              datalabels: { display: false },
             });
             {% endif %}
 
@@ -201,7 +184,7 @@
                   legend: { display: false },
                   datalabels: { display: false },
                 },
-                layout: { padding: { top: 20, bottom: 10 } },
+                layout: { padding: { top: 20, bottom: 10, right: 8 } },
                 responsive: true,
                 scales: {
                   x: { grid: { color: "#1e2a47" }, ticks: { color: "#93a0bd" } },
